@@ -14,6 +14,15 @@ import torchvision.transforms as transforms
 import random
 import torch.optim as optim
 
+def normalizeNumpy(array):
+    the_min = np.min(array)
+    the_max = np.max(array)
+    the_range = the_max - the_min
+    if the_range > 0.0:
+        return (array-the_min)/the_range
+    else:
+        return array
+
 class NoiseDatsetLoader(Dataset):
     def __init__(self, csv_file='TrainingDataSet.csv', root_dir_noisy='TrainingDataSet', root_dir_ref='./',transform=None):
         self.name_csv = pd.read_csv(csv_file)
@@ -30,10 +39,10 @@ class NoiseDatsetLoader(Dataset):
 
         ref_img_name = os.path.join(self.root_dir_ref,self.name_csv.iloc[idx, 0])
         noisy_img_name = os.path.join(self.root_dir_noisy,self.name_csv.iloc[idx, 2])
-        ref_image    = np.array(io.imread(ref_img_name))
-        noisy_image    = np.array(io.imread(noisy_img_name))
-        ref_image    = np.expand_dims(ref_image, axis=0) 
-        noisy_image    = np.expand_dims(noisy_image, axis=0) 
+        ref_image    = normalizeNumpy(np.array(io.imread(ref_img_name)))
+        noisy_image    = normalizeNumpy(np.array(io.imread(noisy_img_name)))
+        ref_image    = np.expand_dims(ref_image, axis=0)
+        noisy_image    = np.expand_dims(noisy_image, axis=0)
         #ref_image = ref_image/256
         #noisy_image = noisy_image/256
         sample = {'image': ref_image, 'NoisyImage': noisy_image}
@@ -41,8 +50,3 @@ class NoiseDatsetLoader(Dataset):
             sample['image'] = self.transform(sample['image'])
             sample['NoisyImage'] = self.transform(sample['NoisyImage'])
         return sample
-
-
-
-
-
